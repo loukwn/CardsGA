@@ -116,7 +116,7 @@ void reportChoices() {
 		text << "console and file ";
 		break;
 	}
-	text << "every " << dispFreq << " generations.";
+	text << "every " << dispFreq << " generation(s).";
 	if (sel3==1) {
 		text << "\nSimulation pace will be controlled by user.\n";
 	}

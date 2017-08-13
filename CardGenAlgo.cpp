@@ -349,19 +349,19 @@ void CardGenAlgo::select() {
 	for (int i = 0; i < mPopsize; ++i) {
 		roulette = randZeroToOne();
 
-		if (mPopulation[0].pCum >= roulette) {
+		if (mPopulation[0].pCum > roulette) {
 			newPopulation.push_back(mPopulation[0]);
 			continue;
 		}
 
-		if (mPopulation[mPopsize - 1].pCum <= roulette) {
+		if (mPopulation[mPopsize - 1].pCum < roulette) {
 			newPopulation.push_back(mPopulation[bestGenotypeIndex]);
 			continue;
 		}
 
 		j = 0;
 		do {
-			if (mPopulation[j].pCum <= roulette && mPopulation[j + 1].pCum >= roulette) {
+			if (mPopulation[j].pCum < roulette && mPopulation[j + 1].pCum >= roulette) {
 				// we found a survivor
 				newPopulation.push_back(mPopulation[j + 1]);
 				break;
