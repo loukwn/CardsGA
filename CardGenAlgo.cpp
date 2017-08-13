@@ -26,7 +26,10 @@ CardGenAlgo::CardGenAlgo(int popSize, double pXOver, double pMutation, int maxGe
 		if (outputChoice != OUTPUT_CONSOLE) {
 			// append to file
 			std::ofstream outfile("output.csv", std::ofstream::out | std::ofstream::trunc);
-			outfile << "Exp Gen TotFitness AvgFitness StdDev BestGenoSum BestGenoProd BestGenoFitnessn\n";
+			outfile << "Exp Gen TotFitness AvgFitness StdDev ";
+			for (int i = 0; i < mTargetCards; ++i)
+				outfile << "Card" << i+1 << " ";
+			outfile << "BestGenoSum BestGenoProd BestGenoFitness\n";
 			outfile.close();
 		}
 	}
@@ -52,7 +55,10 @@ CardGenAlgo::CardGenAlgo(int sum, int prod, int totalCards, int popSize, double 
 		if (outputChoice != OUTPUT_CONSOLE) {
 			// append to file
 			std::ofstream outfile("output.csv", std::ofstream::out | std::ofstream::trunc);
-			outfile << "Exp Gen TotFitness AvgFitness StdDev BestGenoSum BestGenoProd BestGenoFitnessn\n";
+			outfile << "Exp Gen TotFitness AvgFitness StdDev ";
+			for (int i = 0; i < mTargetCards; ++i)
+				outfile << "Card" << i+1 << " ";
+			outfile << "BestGenoSum BestGenoProd BestGenoFitness\n";
 			outfile.close();
 		}
 
@@ -94,7 +100,7 @@ void CardGenAlgo::initialize() {
 
 	int i, j;
 
-	srand(time(NULL));
+	srand(time(NULL)+mCurrentExp);
 
 	for (i = 0; i < mPopsize; ++i) {
 		Genotype genotype = Genotype(mTargetCards);
@@ -128,7 +134,8 @@ int CardGenAlgo::advanceToFinalGeneration() {
 		}
 		else {
 			solutionFound = true;
-			break;
+			displayDataAndReport(true);
+			return mCurrentGen;
 		}
 		displayDataAndReport(false);
 	}
@@ -137,7 +144,6 @@ int CardGenAlgo::advanceToFinalGeneration() {
 		cout << "You are already at the last generation. Try restarting!\n" << endl;
 		return mCurrentGen;
 	}
-	displayDataAndReport(true);
 
 	return mCurrentGen;
 }
@@ -241,7 +247,11 @@ void CardGenAlgo::displayDataAndReport(bool ended) {
 		// append to file
 		if (mOutputChoice == OUTPUT_BOTH || mOutputChoice == OUTPUT_CSV) {
 			std::ofstream outfile("output.csv", std::ios_base::app);
-			outfile << mCurrentExp << " " << mCurrentGen << " " << totalFitness << " " << avg << " " << stddev << " " << bestGenotype.sum << " " << bestGenotype.product << " " << bestGenotype.fitness << endl;
+			outfile << mCurrentExp << " " << mCurrentGen << " " << totalFitness << " " << avg << " " << stddev << " ";
+			for (int i = 0; i < mTargetCards; ++i) {
+				outfile << bestGenotype.Genes[i] << " ";
+			}
+			outfile << bestGenotype.sum << " " << bestGenotype.product << " " << bestGenotype.fitness << endl;
 			outfile.close();
 		}
 	}
@@ -265,7 +275,11 @@ void CardGenAlgo::displayDataAndReport(bool ended) {
 			// append to file
 			if (mOutputChoice == OUTPUT_BOTH || mOutputChoice == OUTPUT_CSV) {
 				std::ofstream outfile("output.csv", std::ios_base::app);
-				outfile << mCurrentExp << " " << mCurrentGen << " " << totalFitness << " " << avg << " " << stddev << " " << bestGenotype.sum << " " << bestGenotype.product << " " << bestGenotype.fitness << endl;
+				outfile << mCurrentExp << " " << mCurrentGen << " " << totalFitness << " " << avg << " " << stddev << " "; 
+				for (int i = 0; i < mTargetCards; ++i) {
+					outfile << bestGenotype.Genes[i] << " ";
+				}
+				outfile << bestGenotype.sum << " " << bestGenotype.product << " " << bestGenotype.fitness << endl;
 				outfile.close();
 			}
 		}
@@ -306,6 +320,7 @@ bool CardGenAlgo::evaluate() {
 
 			if (mPopulation[i].fitness == 0) {
 				setBestGenotype(i);
+				bestGenotype.fitness = 1;
 				return true;
 			}
 			mPopulation[i].fitness = 1 / (mPopulation[i].fitness);
