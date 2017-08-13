@@ -1,13 +1,19 @@
 // the demo file
 #include <cstdint>
 #include <limits>
-
+#include <chrono>
 
 #include "CardGenAlgo.h"
 
 #include <iostream>
 #include <string>
 #include <sstream>
+
+
+typedef std::chrono::high_resolution_clock::time_point TimeVar;                        
+#define duration(a) std::chrono::duration_cast<std::chrono::milliseconds>(a).count()   
+#define timeNow() std::chrono::high_resolution_clock::now()                            
+
 
 using namespace std;
 
@@ -28,9 +34,10 @@ void clearSCR() {
 }
 
 inline void waitUserInput() {
-	cout << "\n> Press [enter] to continue.. ";   //  
-	while (getchar() != '\n');                  //  perimenei eisodo apo ton xrhsth gia synexeia
-	cout << "\n\n";                             //
+	cout << "\n> Press [enter] to continue.. ";     
+	string temp;
+	temp = cin.get();                  
+	cout << "\n\n";                            
 }
 
 inline int getNumber(int a = 0, int b = std::numeric_limits<std::int32_t>::max(), bool isInline = true) {
@@ -143,7 +150,7 @@ void manualRun(CardGenAlgo cga) {
 		cout << "2) Advance N generations\n";
 		cout << "3) Advance to last generation\n";
 		cout << "4) Restart simulation\n";
-		cout << "5) Exit\n";
+		cout << "5) Go to start\n";
 
 		sel = getNumber(1, 5, false);
 
@@ -176,15 +183,20 @@ void manualRun(CardGenAlgo cga) {
 
 void automatedRun(CardGenAlgo cga) {
 	int cexp=1;
+	double dur = 0;
 	
 	cout << "> About to start the experiments. ";
 	waitUserInput();
 
-	cout << "> Execution began!";
+	cout << "> Execution began!\n";
 	
+	TimeVar now;
+
 	do {
 		cout << "> Curr Exp: " << cexp << endl;
+		now = timeNow();
 		cga.advanceToFinalGeneration();
+		dur += duration(timeNow() - now);
 		if (cexp == numberOfExperiments)
 			break;
 		cga.restartSimulation(sel4 == 1 ? true : false);
@@ -192,98 +204,103 @@ void automatedRun(CardGenAlgo cga) {
 	} while (true);
 
 	cout << "> Execution ended!\n";
-	cout << "> Program will now exit.\n";
+	cout << "> Total time elapsed: " << dur << " ms\n";
+	cout << "> Program will return to main screen now.\n";
 	waitUserInput();
 }
 
 int main() {
 
-	bool readyToStart = false;
+	bool readyToStart;
 
 	do {
+		readyToStart = false;
+		do {
 
-		cout << "*--------------------------------------------*\n";
-		cout << "|     Card Stack Genetic algorithm Demo      |\n";
-		cout << "*--------------------------------------------*\n\n";
+			cout << "*--------------------------------------------*\n";
+			cout << "|     Card Stack Genetic algorithm Demo      |\n";
+			cout << "*--------------------------------------------*\n\n";
 
-		cout << "-Choose type of problem:\n";
-		cout << "1) Default (Sum=36, Product=360, Cards: 1-10)\n";
-		cout << "2) Specify your own data\n";
-		cout << "3) Exit\n";
+			cout << "-Choose type of problem:\n";
+			cout << "1) Default (Sum=36, Product=360, Cards: 1-10)\n";
+			cout << "2) Specify your own data\n";
+			cout << "3) Exit\n";
 
-		sel1 = getNumber(1, 3, false);
-		if (sel1 == 3) return 0;
-		else if (sel1 == 2) {
-			cout << "> Enter sum target: ";
-			sum = getNumber();
+			sel1 = getNumber(1, 3, false);
+			if (sel1 == 3) return 0;
+			else if (sel1 == 2) {
+				cout << "> Enter sum target: ";
+				sum = getNumber();
 
-			cout << "> Enter prod target: ";
-			prod = getNumber();
+				cout << "> Enter prod target: ";
+				prod = getNumber();
 
-			cout << "> Enter card range: ";
-			cards = getNumber();
+				cout << "> Enter card range: ";
+				cards = getNumber();
+				cout << endl;
+			}
+
+			cout << "-Enter the rest of the parameters:\n";
+			cout << "> Enter population size: ";
+			popsize = getNumber();
+			cout << "> Enter propability of crossover: ";
+			pxover = getDouble();
+			cout << "> Enter probability of mutation: ";
+			pmut = getDouble();
+			cout << "> Enter maximum number of generations: ";
+			maxgens = getNumber();
+			cout << "> Enter your output preference: \n";
+			cout << "1) Console only\n";
+			cout << "2) File only (output.csv)\n";
+			cout << "3) Both\n";
+
+			sel2 = getNumber(1, 3, false) - 1;
+			cout << "> Enter how often (in generations) you want the output to appear: ";
+			dispFreq = getNumber();
 			cout << endl;
+
+			cout << "-Choose the execution plan:\n";
+			cout << "1) Start and control the flow manually\n";
+			cout << "2) Start a batch of experiments\n";
+
+			sel3 = getNumber(1, 2, false);
+
+			if (sel3 == 2) {
+				cout << "-How many experiments? ";
+				numberOfExperiments = getNumber(1);
+				cout << "-Same population every time? \n";
+				cout << "1) Yes 2) No\n";
+				sel4 = getNumber(1, 2, false);
+			}
+			reportChoices();
+
+			cout << "\n-Does this look OK?\n1) Yes 2) No\n";
+			if (getNumber(1, 2, false) == 1) readyToStart = true;
+
+			clearSCR();
+
+		} while (!readyToStart);
+
+		auto output = static_cast<OutputChoice>(sel2);
+
+		if (sel1 == 1) {
+			CardGenAlgo cga = CardGenAlgo(popsize, pxover, pmut, maxgens, output, dispFreq);
+
+			if (sel3 == 1)
+				manualRun(cga);
+			else
+				automatedRun(cga);
 		}
+		else {
+			CardGenAlgo cga = CardGenAlgo(sum, prod, cards, popsize, pxover, pmut, maxgens, output, dispFreq);
 
-		cout << "-Enter the rest of the parameters:\n";
-		cout << "> Enter population size: ";
-		popsize = getNumber();
-		cout << "> Enter propability of crossover: ";
-		pxover = getDouble();
-		cout << "> Enter probability of mutation: ";
-		pmut = getDouble();
-		cout << "> Enter maximum number of generations: ";
-		maxgens = getNumber();
-		cout << "> Enter your output preference: \n";
-		cout << "1) Console only\n";
-		cout << "2) File only (output.csv)\n";
-		cout << "3) Both\n";
-
-		sel2 = getNumber(1, 3, false) - 1;
-		cout << "> Enter how often (in generations) you want the output to appear: ";
-		dispFreq = getNumber();
-		cout << endl;
-
-		cout << "-Choose the execution plan:\n";
-		cout << "1) Start and control the flow manually\n";
-		cout << "2) Start a batch of experiments\n";
-
-		sel3 = getNumber(1, 2, false);
-
-		if (sel3 == 2) {
-			cout << "-How many experiments? ";
-			numberOfExperiments = getNumber(1);
-			cout << "-Same population every time? \n";
-			cout << "1) Yes 2) No\n";
-			sel4 = getNumber(1, 2, false);
+			if (sel3 == 1)
+				manualRun(cga);
+			else
+				automatedRun(cga);
 		}
-		reportChoices();
-
-		cout << "\n-Does this look OK?\n1) Yes 2) No\n";
-		if (getNumber(1, 2, false) == 1) readyToStart = true;
 
 		clearSCR();
-	
-	} while (!readyToStart);
-
-	auto output = static_cast<OutputChoice>(sel2);
-	
-	if (sel1 == 1) {
-		CardGenAlgo cga = CardGenAlgo(popsize, pxover, pmut, maxgens, output, dispFreq);
-
-		if (sel3 == 1)
-			manualRun(cga);
-		else
-			automatedRun(cga);
-	}
-	else {
-		CardGenAlgo cga = CardGenAlgo(sum, prod, cards, popsize, pxover, pmut, maxgens, output, dispFreq);
-
-		if (sel3 == 1)
-			manualRun(cga);
-		else
-			automatedRun(cga);
-	}
-
+	} while (true);
 	return 0;
 }
