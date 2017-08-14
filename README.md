@@ -4,4 +4,4 @@ Genetic algotithm that solves (or approaches the solution of) the problem of pla
 
 The code is in the CardsGenAlgo.cpp, CardsGenAlgo.h files, while a demo VS solution is included to run the algorithm.
 
-Developed as part of a semester exam of my Computational Intelligence class.
+Developed as part of a semester project of my Computational Intelligence class.
