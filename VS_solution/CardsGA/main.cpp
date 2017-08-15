@@ -54,8 +54,9 @@ inline int getNumber(int a = 0, int b = std::numeric_limits<std::int32_t>::max()
 		if (!isInline)
 			cout << "\n> ";
 		getline(cin, strInput);
-		if (strInput[0] == '0' || strInput[0] == '.')
-			continue;
+		if (a!=0)
+			if (strInput[0] == '0' || strInput[0] == '.')
+				continue;
 		for (int i = 0; i < strInput.length(); i++) {
 			if (strInput[i] < '0' || strInput[i] > '9')
 				loopAgain = true;
@@ -123,7 +124,7 @@ void reportChoices() {
 		text << "console and file ";
 		break;
 	}
-	text << "every " << dispFreq << " generation(s).";
+	text << "every " << dispFreq << " generation(s) (or when solution is found).";
 	if (sel3==1) {
 		text << "\nSimulation pace will be controlled by user.\n";
 	}
@@ -204,7 +205,7 @@ void automatedRun(CardGenAlgo cga) {
 	} while (true);
 
 	cout << "> Execution ended!\n";
-	cout << "> Total time elapsed: " << dur << " ms\n";
+	cout << "> Median time of experiment: " << dur/numberOfExperiments << " ms\n";
 	cout << "> Program will return to main screen now.\n";
 	waitUserInput();
 }
@@ -230,13 +231,13 @@ int main() {
 			if (sel1 == 3) return 0;
 			else if (sel1 == 2) {
 				cout << "> Enter sum target: ";
-				sum = getNumber();
+				sum = getNumber(0);
 
 				cout << "> Enter prod target: ";
-				prod = getNumber();
+				prod = getNumber(0);
 
 				cout << "> Enter card range: ";
-				cards = getNumber();
+				cards = getNumber(2);
 				cout << endl;
 			}
 
