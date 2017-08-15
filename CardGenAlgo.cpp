@@ -79,8 +79,8 @@ void CardGenAlgo::checkForInputErrors() {
 	if (mMaxGenerations<1)
 		throw std::invalid_argument("Max Generations should be at least 1");
 
-	if (mTargetSum<1 || mTargetProd<1 || mTargetCards<1)
-		throw std::invalid_argument("Target sum, product and cards should be at least 1");
+	if (mTargetSum<0 || mTargetProd<0 || mTargetCards<2)
+		throw std::invalid_argument("Target sum, product should be positive or 0 and cards should be at least 2");
 }
 
 void CardGenAlgo::initVars() {
@@ -294,6 +294,9 @@ bool CardGenAlgo::evaluate() {
 		int sum, product;
 		bool thereIsCardInProduct = false;
 
+		totalFitness = 0;
+		totalFitnessSquare = 0;
+
 		// for every genotype
 		for (int i = 0; i < mPopsize; ++i) {
 			sum = 0;
@@ -312,7 +315,6 @@ bool CardGenAlgo::evaluate() {
 
 			if (!thereIsCardInProduct) product = 0;
 
-			// TODO: to delete
 			mPopulation[i].sum = sum;
 			mPopulation[i].product = product;
 
@@ -325,6 +327,11 @@ bool CardGenAlgo::evaluate() {
 			}
 			mPopulation[i].fitness = 1 / (mPopulation[i].fitness);
 
+			
+			// update totalFitness and totalFitnessSquare
+			totalFitness += mPopulation[i].fitness;
+			totalFitnessSquare += pow(mPopulation[i].fitness, 2);
+
 			// we save the best genotype
 			if (mPopulation[i].fitness > bestGenotype.fitness)
 				setBestGenotype(i);
@@ -333,23 +340,14 @@ bool CardGenAlgo::evaluate() {
 	return false;
 }
 
-// calculate the probabilities of each genotype
+// calculate the probabilities of each genotype and select those that will pass to the next gen
 void CardGenAlgo::select() {
 
 	vector<Genotype> newPopulation = vector<Genotype>();
 	double roulette;
 	int j;
 
-	totalFitness = 0;
-	totalFitnessSquare = 0;
-
-	// first we calculate the total fitness
-	for (int i = 0; i < mPopsize; ++i) {
-		totalFitness += mPopulation[i].fitness;
-		totalFitnessSquare += pow(mPopulation[i].fitness, 2);
-	}
-
-	// then we set the selection/cumulative probabilities for every genotype
+	// first we set the selection/cumulative probabilities for every genotype
 	for (int i = 0; i < mPopsize; ++i) {
 		mPopulation[i].pSel = mPopulation[i].fitness / totalFitness;
 
