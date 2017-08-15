@@ -35,7 +35,7 @@ void clearSCR() {
 
 inline void waitUserInput() {
 	cout << "\n> Press [enter] to continue.. ";     
-	string temp;
+	int temp;
 	temp = cin.get();                  
 	cout << "\n\n";                            
 }
@@ -57,7 +57,9 @@ inline int getNumber(int a = 0, int b = std::numeric_limits<std::int32_t>::max()
 		if (a!=0)
 			if (strInput[0] == '0' || strInput[0] == '.')
 				continue;
-		for (int i = 0; i < strInput.length(); i++) {
+
+		int len = (int)strInput.length();
+		for (int i = 0; i < len; i++) {
 			if (strInput[i] < '0' || strInput[i] > '9')
 				loopAgain = true;
 		}
@@ -87,7 +89,8 @@ inline double getDouble() {
 			cout << "\n";
 		getline(cin, strInput);
 
-		for (int i = 0; i < strInput.length(); i++) {
+		int len = (int)strInput.length();
+		for (int i = 0; i < len; i++) {
 			if ((strInput[i] < '0' || strInput[i] > '9') && strInput[i]!='.')
 				loopAgain = true;
 		}
